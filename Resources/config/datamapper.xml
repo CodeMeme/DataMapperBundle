@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://www.symfony-project.org/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="datamapper.mapper.class">CodeMeme\DataMapperBundle\Mapper\Mapper</parameter>
+        <parameter key="datamapper.default_adapters" type="collection">
+            <parameter>CodeMeme\DataMapperBundle\Mapper\Adapter\ArrayAdapter</parameter>
+            <parameter>CodeMeme\DataMapperBundle\Mapper\Adapter\ObjectAdapter</parameter>
+            <parameter>CodeMeme\DataMapperBundle\Mapper\Adapter\ClassAdapter</parameter>
+        </parameter>
+    </parameters>
+
+    <services>
+        <service id="datamapper.default_mapper" class="%datamapper.mapper.class%">
+            <argument type="service" id="service_container" />
+            <call method="setAdapters">
+                <argument>%datamapper.default_adapters%</argument>
+            </call>
+        </service>
+    </services>
+</container>
