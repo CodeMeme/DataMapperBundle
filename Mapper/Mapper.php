@@ -2,26 +2,37 @@
 
 namespace CodeMeme\DataMapperBundle\Mapper;
 
-use CollegeDegrees\EdudirectBundle\Mapper\Adapter\AdapterInterface;
-
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class Mapper extends ContainerAware implements AdapterInterface
+use CodeMeme\DataMapperBundle\Mapper\Adapter\AdapterInterface;
+use CodeMeme\DataMapperBundle\Normalizer\NormalizerInterface;
+
+class Mapper extends ContainerAware implements AdapterInterface, NormalizerInterface
 {
+
+    CONST NORMALIZE = 1;
+
+    CONST DENORMALIZE = -1;
+
+    CONST NONE = 0;
 
     protected $adapters;
 
-    public function __construct(ContainerInterface $container = null, $adapters = array())
+    protected $normalizers;
+
+    public function __construct(ContainerInterface $container = null, $adapters = array(), $normalizers = array())
     {
-        $this->adapters = new ArrayCollection;
+        $this->adapters     = new ArrayCollection;
+        $this->normalizers  = new ArrayCollection;
         
         $this->setContainer($container);
-        $this->setAdapters($adapters);
+        $this->addAdapters($adapters);
+        $this->addNormalizers($normalizers);
     }
 
-    public function convert($from, $to = null)
+    public function convert($from, $to = null, $processing = self::NONE)
     {
         if ($this->supports($from)) {
             $this->converted = $this->convertFrom($from);
@@ -31,6 +42,19 @@ class Mapper extends ContainerAware implements AdapterInterface
                 is_object($from) ? get_class($from) : gettype($from),
                 print_r($from, true)
             ));
+        }
+        
+        switch ($processing) {
+            case self::NORMALIZE;
+                $this->converted = $this->normalize($this->converted);
+                break;
+            
+            case self::DENORMALIZE;
+                $this->converted = $this->denormalize($this->converted);
+                break;
+            
+            default:
+                break;
         }
         
         if (null === $to) {
@@ -66,6 +90,24 @@ class Mapper extends ContainerAware implements AdapterInterface
         }
     }
 
+    public function normalize(Array $data)
+    {
+        foreach ($this->getNormalizers() as $normalizer) {
+            $data = $normalizer->normalize($data);
+        }
+        
+        return $data;
+    }
+
+    public function denormalize(Array $data)
+    {
+        foreach ($this->getNormalizers() as $normalizer) {
+            $data = $normalizer->denormalize($data);
+        }
+        
+        return $data;
+    }
+
     public function getContainer()
     {
         if (null === $this->container) {
@@ -82,7 +124,9 @@ class Mapper extends ContainerAware implements AdapterInterface
 
     public function addAdapter($adapter)
     {
-        $this->getAdapters()->add($adapter);
+        $this->getAdapters()->add(
+            (is_string($adapter)) ? new $adapter($this->container) : $adapter
+        );
         
         return $this;
     }
@@ -98,13 +142,37 @@ class Mapper extends ContainerAware implements AdapterInterface
 
     public function setAdapters($adapters)
     {
-        $container = $this->container;
+        $this->adapters = $adapters;
         
-        $adapters = array_map(function($adapter) use ($container) {
-            return (is_string($adapter)) ? new $adapter(($container)) : $adapter;
-        }, $adapters);
+        return $this;
+    }
+
+    public function getNormalizers()
+    {
+        return $this->normalizers;
+    }
+
+    public function addNormalizer($normalizer)
+    {
+        $this->getNormalizers()->add(
+            (is_string($normalizer)) ? new $normalizer : $normalizer
+        );
         
-        $this->addAdapters($adapters);
+        return $this;
+    }
+
+    public function addNormalizers($normalizers)
+    {
+        foreach ($normalizers as $normalizer) {
+            $this->addNormalizer($normalizer);
+        }
+        
+        return $this;
+    }
+
+    public function setNormalizers($normalizers)
+    {
+        $this->normalizers = $normalizers;
         
         return $this;
     }

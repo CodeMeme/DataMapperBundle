@@ -5,7 +5,7 @@ namespace CodeMeme\DataMapperBundle\Tests;
 use CodeMeme\DataMapperBundle\DependencyInjection\DataMapperExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 abstract class TestCase extends \PHPUnit_Framework_TestCase
 {
@@ -13,15 +13,17 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->container = $this->getContainer();
-        $this->loader = new DataMapperExtension;
+        $this->extension = new DataMapperExtension;
         
-        $config = Yaml::load(__DIR__.'/Fixtures/mappers.yml');
-        $this->loader->configLoad($config, $this->container);
+        $loader = new XmlFileLoader($this->container, __DIR__.'/Fixtures');
+        $loader->load('mappers.xml');
+        
+        $this->extension->configLoad(array(), $this->container);
     }
 
     public function tearDown()
     {
-        unset($this->container, $this->loader);
+        unset($this->container, $this->extension);
     }
 
     protected function getContainer()

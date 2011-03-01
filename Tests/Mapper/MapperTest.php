@@ -5,9 +5,8 @@ namespace CodeMeme\DataMapperBundle\Tests\Mapper;
 use CodeMeme\DataMapperBundle\Mapper\Mapper;
 use CodeMeme\DataMapperBundle\Mapper\Adapter\ArrayAdapter;
 use CodeMeme\DataMapperBundle\Mapper\Adapter\ObjectAdapter;
-use CodeMeme\DataMapperBundle\Tests\TestCase;
 
-class MapperTest extends TestCase
+class MapperTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testInstantiation()

@@ -6,6 +6,7 @@
 
     <parameters>
         <parameter key="datamapper.mapper.class">CodeMeme\DataMapperBundle\Mapper\Mapper</parameter>
+        <parameter key="datamapper.normalizer.class">CodeMeme\DataMapperBundle\Normalizer\Normalizer</parameter>
         <parameter key="datamapper.default_adapters" type="collection">
             <parameter>CodeMeme\DataMapperBundle\Mapper\Adapter\ArrayAdapter</parameter>
             <parameter>CodeMeme\DataMapperBundle\Mapper\Adapter\ObjectAdapter</parameter>
@@ -16,9 +17,7 @@
     <services>
         <service id="datamapper.default_mapper" class="%datamapper.mapper.class%">
             <argument type="service" id="service_container" />
-            <call method="setAdapters">
-                <argument>%datamapper.default_adapters%</argument>
-            </call>
+            <argument>%datamapper.default_adapters%</argument>
         </service>
     </services>
 </container>

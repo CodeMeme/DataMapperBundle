@@ -15,8 +15,8 @@ class DataMapperExtension extends Extension
 
     public function configLoad(Array $configs, ContainerBuilder $container)
     {
-        if (! $container->hasParameter('datamappers.mapper.class')) {
-            $loader = new XmlFileLoader($container, __DIR__.'/..//Resources/config');
+        if (! $container->has('datamapper')) {
+            $loader = new XmlFileLoader($container, __DIR__.'/../Resources/config');
             $loader->load('datamapper.xml');
             
             $container->setAlias('datamapper', 'datamapper.default_mapper');

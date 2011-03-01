@@ -3,7 +3,8 @@
 namespace CodeMeme\DataMapperBundle\Tests\Mapper\Adapter;
 
 use CodeMeme\DataMapperBundle\Mapper\Adapter\ClassAdapter;
-use CodeMeme\DataMapperBundle\Tests\TestCase;
+use CodeMeme\DataMapperBundle\Tests\Models\Post;
+use CodeMeme\DataMapperBundle\Tests\Models\Category;
 
 class ClassAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -128,8 +129,8 @@ class ClassAdapterTest extends \PHPUnit_Framework_TestCase
         
         $converted = $this->getAdapter()->convertTo($newPost, $values);
         
-        $this->assertType('CodeMeme\DataMapperBundle\Tests\Mapper\Adapter\Post', $converted);
-        $this->assertType('CodeMeme\DataMapperBundle\Tests\Mapper\Adapter\Category', $converted->getCategory());
+        $this->assertType('CodeMeme\DataMapperBundle\Tests\Models\Post', $converted);
+        $this->assertType('CodeMeme\DataMapperBundle\Tests\Models\Category', $converted->getCategory());
     }
 
     protected function getAdapter()
@@ -154,84 +155,6 @@ class ClassAdapterTest extends \PHPUnit_Framework_TestCase
         return array(
             array($post),
         );
-    }
-
-}
-
-/**
- * @class Post
- */
-class Post
-{
-
-    public $id;
-
-    protected $name;
-
-    protected $slug;
-
-    protected $category;
-
-    private $dateModified;
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
-    public function getSlug()
-    {
-        return $this->slug;
-    }
-
-    public function setSlug($slug)
-    {
-        $this->slug = $slug;
-    }
-
-    public function getCategory()
-    {
-        return $this->category;
-    }
-
-    public function setCategory(Category $category = null)
-    {
-        $this->category = $category;
-    }
-
-    public function getDateModified()
-    {
-        return $this->dateModified;
-    }
-
-    public function setDateModified($dateModified)
-    {
-        $this->dateModified = $dateModified;
-    }
-
-}
-
-/**
- * @class Category
- */
-class Category
-{
-
-    protected $name;
-
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    public function setName($name)
-    {
-        $this->name = $name;
     }
 
 }

@@ -48,27 +48,56 @@ class ClassAdapter extends Adapter
         $r = new \ReflectionClass(get_class($class));
         
         foreach ($values as $key => $value) {
-            // Set public properties first
-            if (($property = $r->getProperty($key)) && $property->isPublic()) {
-                $class->$key = $value;
-            } else if ($method = $r->getMethod($setter = 'set' . ucfirst($key))) {
-                // Setters should expect a single parameter
-                $parameter = current($method->getParameters());
-                
-                // If the setter has typehint (and there are values to assign), instantiate it
-                if ($value && $typehintClass = $parameter->getClass()) {
-                    $typehint = new $typehintClass->name;
-                    $value = $this->convertTo($typehint, $value);
-                }
-                
-                // Call the setter with the new value
-                $method->invoke($class, $value);
-            } else {
+            if (!$this->setViaPublicProperty($class, $key, $value) &&
+                !$this->setViaSetterMethod($class, $key, $value)) {
                 throw new Exception(sprintf("Cannot convert %s for %s", $key, get_class($class)));
             }
         }
         
         return $class;
+    }
+
+    protected function setViaPublicProperty($class, $key, $value)
+    {
+        $r = new \ReflectionClass(get_class($class));
+        
+        if ($r->hasProperty($key)) {
+            $property = $r->getProperty($key);
+            
+            if ($property->isPublic()) {
+                $class->$key = $value;
+                
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    protected function setViaSetterMethod($class, $key, $value)
+    {
+        $r = new \ReflectionClass(get_class($class));
+        
+        $setter = 'set' . ucfirst($key);
+        
+        if ($r->hasMethod($setter)) {
+            $method = $r->getMethod($setter);
+            
+            $parameter = current($method->getParameters());
+            
+            // If the setter has typehint (and there are values to assign), instantiate it
+            if ($value && $typehintClass = $parameter->getClass()) {
+                $typehint = new $typehintClass->name;
+                $value = $this->convertTo($typehint, $value);
+            }
+            
+            // Call the setter with the new value
+            $method->invoke($class, $value);
+            
+            return true;
+        }
+        
+        return false;
     }
 
     public function supports($object)
