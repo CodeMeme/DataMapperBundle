@@ -12,44 +12,54 @@ class ClassAdapter extends Adapter
     {
         $r = new \ReflectionClass(get_class($class));
         
-        $values = array();
+        $converted = array();
         
         foreach ($r->getProperties() as $property) {
             if ($property->isPublic()) {
                 $key = $property->name;
-                $values[$key] = $class->$key;
+                
+                $converted[$key] = $class->$key;
             }
         }
         
         foreach ($r->getMethods() as $method) {
-            if (substr($method->name, 0, 3) === 'get') {
-                $key = lcfirst(substr($method->name, 3));
-                
-                $setter = array($class, 'set' . ucfirst($key));
-                
-                if (is_callable($setter)) {
-                    $value = call_user_func(array($class, $method->name));
-                    
-                    $values[$key] = $this->supports($value)
-                                  ? $this->convertFrom($value) ?: null
-                                  : $value;
-                }
+            $key = lcfirst(substr($method->name, 3));
+            
+            if (empty($key)) {
+                continue;
             }
+            
+            $getter = 'get' . ucfirst($key);
+            $setter = 'set' . ucfirst($key);
+            
+            if (($method->name === $getter) && $r->hasMethod($setter)) {
+                $value = $method->invoke($class);
+                
+                $converted[$key] = $this->supports($value)
+                                 ? $this->convert($value) ?: null
+                                 : $value;
+            }
+            
         }
         
-        return $values;
+        return $converted;
     }
 
-    public function convertTo($class, Array $values)
+    public function convertTo($class, Array $values, $strict = false)
     {
         // Merge any existing values with the new ones
-        $values = array_merge($this->convertFrom($class), $values);
+        $values = array_merge($this->convert($class), $values);
         
         $r = new \ReflectionClass(get_class($class));
         
         foreach ($values as $key => $value) {
+            if (null === $value) {
+                continue;
+            }
+            
             if (!$this->setViaPublicProperty($class, $key, $value) &&
-                !$this->setViaSetterMethod($class, $key, $value)) {
+                !$this->setViaSetterMethod($class, $key, $value) &&
+                $strict) {
                 throw new Exception(sprintf("Cannot convert %s for %s", $key, get_class($class)));
             }
         }

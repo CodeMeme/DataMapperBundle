@@ -16,13 +16,19 @@ class Normalizer implements NormalizerInterface
         $this->setMap($map);
     }
 
-    public function normalize(Array $data)
+    public function normalize(Array $data, $strict = false)
     {
         $normalized = array();
         
         foreach ($data as $key => $value) {
             if ($this->getMap()->containsKey($key)) {
+                // Re-assign key to normalized key
                 $key = $this->getMap()->get($key);
+            } else if ($this->getMap()->contains($key)) {
+                // No need to re-assign key
+            } else if ($strict) {
+                // Key not found in normalization map, so skip
+                continue;
             }
             
             $normalized[$key] = $value;
