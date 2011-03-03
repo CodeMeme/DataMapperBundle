@@ -91,7 +91,7 @@ class DataMapperExtension extends Extension
      */
     public function getNamespace()
     {
-        return 'http://www.symfony-project.org/schema/dic/rules-engine';
+        return 'http://www.symfony-project.org/schema/dic/datamapper';
     }
 
     /**
