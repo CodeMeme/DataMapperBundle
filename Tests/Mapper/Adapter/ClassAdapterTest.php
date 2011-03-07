@@ -5,6 +5,8 @@ namespace CodeMeme\DataMapperBundle\Tests\Mapper\Adapter;
 use CodeMeme\DataMapperBundle\Mapper\Adapter\ClassAdapter;
 use CodeMeme\DataMapperBundle\Tests\Models\Post;
 use CodeMeme\DataMapperBundle\Tests\Models\Category;
+use CodeMeme\DataMapperBundle\Tests\Models\User;
+use CodeMeme\DataMapperBundle\Tests\Models\Address;
 
 class ClassAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -123,7 +125,6 @@ class ClassAdapterTest extends \PHPUnit_Framework_TestCase
         
         $values = $this->getAdapter()->convertFrom($oldPost);
         
-        
         $newPost = new Post;
         $newPost->id = 1;
         
@@ -131,6 +132,24 @@ class ClassAdapterTest extends \PHPUnit_Framework_TestCase
         
         $this->assertType('CodeMeme\DataMapperBundle\Tests\Models\Post', $converted);
         $this->assertType('CodeMeme\DataMapperBundle\Tests\Models\Category', $converted->getCategory());
+    }
+
+    /**
+     * @dataProvider userPRovider
+     */
+    public function testConvertUserWithAddress($user)
+    {
+        $values = $this->getAdapter()->convertFrom($user);
+        
+        $this->assertType(
+            \PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY,
+            $values
+        );
+        
+        $this->assertType(
+            \PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY,
+            $values['address']
+        );
     }
 
     protected function getAdapter()
@@ -154,6 +173,25 @@ class ClassAdapterTest extends \PHPUnit_Framework_TestCase
         
         return array(
             array($post),
+        );
+    }
+
+    public function userProvider()
+    {
+        $user           = new User;
+        $user->name     = 'Name';
+        $user->email    = 'E-mail';
+        
+        $address            = new Address;
+        $address->street    =   'Street';
+        $address->city      =   'City';
+        $address->state     =   'State';
+        $address->zip       =   'Zip';
+        
+        $user->address  = $address;
+        
+        return array(
+            array($user),
         );
     }
 
