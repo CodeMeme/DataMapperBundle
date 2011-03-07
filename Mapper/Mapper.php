@@ -74,7 +74,9 @@ class Mapper extends ContainerAware implements AdapterInterface, NormalizerInter
 
     public function convertFrom($from)
     {
-        foreach ($this->getAdapters() as $adapter) {
+        $lifo = array_reverse($this->getAdapters()->toArray());
+        
+        foreach ($lifo as $adapter) {
             if ($adapter->supports($from)) {
                 return $adapter->convertFrom($from);
             }
@@ -83,7 +85,9 @@ class Mapper extends ContainerAware implements AdapterInterface, NormalizerInter
 
     public function convertTo($to, Array $normalized)
     {
-        foreach ($this->getAdapters() as $adapter) {
+        $lifo = array_reverse($this->getAdapters()->toArray());
+        
+        foreach ($lifo as $adapter) {
             if ($adapter->supports($to)) {
                 return $adapter->convertTo($to, $normalized);
             }
