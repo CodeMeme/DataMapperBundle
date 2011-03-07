@@ -18,7 +18,11 @@ class ClassAdapter extends Adapter
             if ($property->isPublic()) {
                 $key = $property->name;
                 
-                $converted[$key] = $class->$key;
+                $value = $class->$key;
+                
+                $converted[$key] = $this->supports($value)
+                                 ? $this->convert($value) ?: null
+                                 : $value;
             }
         }
         
