@@ -29,6 +29,7 @@ class PostMapperTest extends TestCase
             'body'          =>  'My Body',
             'category'      =>  null,
             'dateModified'  =>  null,
+            'comments'      =>  null,
         ), $converted);
         
         $post = $mapper->convert($converted, $post);
@@ -47,6 +48,7 @@ class PostMapperTest extends TestCase
             'post_content'  =>  'My Body',
             'post_category' =>  null,
             'last_updated'  =>  null,
+            'post_comments' =>  null,
         );
         
         $mapper = $this->container->get('datamapper.post_mapper');

@@ -2,6 +2,8 @@
 
 namespace CodeMeme\DataMapperBundle\Mapper\Adapter;
 
+use ReflectionClass;
+
 use CodeMeme\DataMapperBundle\Mapper\Adapter\Adapter;
 use CodeMeme\DataMapperBundle\Mapper\Exception;
 
@@ -10,40 +12,45 @@ class ClassAdapter extends Adapter
 
     public function convertFrom($class)
     {
-        $r = new \ReflectionClass(get_class($class));
+        $r = new ReflectionClass(get_class($class));
         
         $converted = array();
         
-        foreach ($r->getProperties() as $property) {
-            if ($property->isPublic()) {
-                $key = $property->name;
-                
-                $value = $class->$key;
-                
-                $converted[$key] = $this->supports($value)
-                                 ? $this->convert($value) ?: null
-                                 : $value;
+        if ($this->isTraversable($r)) {
+            foreach ($class as $key => $element) {
+                $converted[$key] = $this->convert($element);
             }
-        }
-        
-        foreach ($r->getMethods() as $method) {
-            $key = lcfirst(substr($method->name, 3));
-            
-            if (empty($key)) {
-                continue;
+        } else {
+            foreach ($r->getProperties() as $property) {
+                if ($property->isPublic()) {
+                    $key = $property->name;
+                    
+                    $value = $class->$key;
+                    
+                    $converted[$key] = $this->supports($value)
+                                     ? $this->convert($value) ?: null
+                                     : $value;
+                }
             }
             
-            $getter = 'get' . ucfirst($key);
-            $setter = 'set' . ucfirst($key);
-            
-            if (($method->name === $getter) && $r->hasMethod($setter)) {
-                $value = $method->invoke($class);
+            foreach ($r->getMethods() as $method) {
+                $key = lcfirst(substr($method->name, 3));
                 
-                $converted[$key] = $this->supports($value)
-                                 ? $this->convert($value) ?: null
-                                 : $value;
+                if (empty($key)) {
+                    continue;
+                }
+                
+                $getter = 'get' . ucfirst($key);
+                $setter = 'set' . ucfirst($key);
+                
+                if (($method->name === $getter) && $r->hasMethod($setter)) {
+                    $value = $method->invoke($class);
+                    
+                    $converted[$key] = $this->supports($value)
+                                     ? $this->convert($value) ?: null
+                                     : $value;
+                }
             }
-            
         }
         
         return $converted;
@@ -114,9 +121,21 @@ class ClassAdapter extends Adapter
         return false;
     }
 
+    protected function isTraversable(ReflectionClass $r)
+    {
+        $interfaces = $r->getInterfaceNames();
+        
+        return  is_array($r)
+        ||      in_array('Countable', $interfaces)
+        ||      in_array('IteratorAggregate', $interfaces)
+        ||      in_array('Traversable', $interfaces)
+        ||      in_array('ArrayAccess', $interfaces)
+        ||      in_array('Doctrine\\Common\\Collections\\Collection', $interfaces);
+    }
+
     public function supports($object)
     {
-        return (gettype($object) === 'object') && (get_class($object) !== 'stdClass');
+        return (gettype($object) === 'object') && get_class($object) && (get_class($object) !== 'stdClass');
     }
 
 }

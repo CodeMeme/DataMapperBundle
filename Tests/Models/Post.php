@@ -2,6 +2,9 @@
 
 namespace CodeMeme\DataMapperBundle\Tests\Models;
 
+use CodeMeme\DataMapperBundle\Tests\Models\Comment;
+use Doctrine\Common\Collections\ArrayCollection;
+
 class Post
 {
 
@@ -16,6 +19,13 @@ class Post
     protected $body;
 
     private $dateModified;
+
+    protected $comments;
+
+    public function __construct()
+    {
+        $this->comments = new ArrayCollection;
+    }
 
     public function getId()
     {
@@ -75,6 +85,18 @@ class Post
     public function setDateModified($dateModified)
     {
         $this->dateModified = $dateModified;
+    }
+
+    public function getComments()
+    {
+        return $this->comments;
+    }
+
+    public function setComments($comments)
+    {
+        $this->comments = $comments;
+        
+        return $this;
     }
 
 }
