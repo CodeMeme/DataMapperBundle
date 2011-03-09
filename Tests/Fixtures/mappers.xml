@@ -12,6 +12,9 @@
             <argument type="collection">
                 <argument type="service" id="datamapper.post_normalizer" />
             </argument>
+            <call method="addAdapter">
+                <argument>CodeMeme\DataMapperBundle\Tests\Mapper\Adapter\PostAdapter</argument>
+            </call>
         </service>
         <service id="datamapper.author_mapper" class="%datamapper.mapper.class%">
             <argument type="service" id="service_container" />
@@ -36,15 +39,13 @@
         <service id="datamapper.post_normalizer" class="%datamapper.normalizer.class%">
             <argument type="collection">
                 <argument key="post_id">id</argument>
-                <argument key="author" type="service" id="datamapper.author_mapper" />
+                <argument key="post_author">author</argument>
                 <argument key="post_title">name</argument>
                 <argument key="post_slug">slug</argument>
                 <argument key="post_content">body</argument>
                 <argument key="post_category">category</argument>
                 <argument key="last_updated">dateModified</argument>
-                <argument key="comments" type="collection">
-                    <argument type="service" id="datamapper.comment_mapper" />
-                </argument>
+                <argument key="post_comments">comments</argument>
             </argument>
         </service>
         <service id="datamapper.author_normalizer" class="%datamapper.normalizer.class%">
