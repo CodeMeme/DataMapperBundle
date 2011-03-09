@@ -5,6 +5,7 @@ namespace CodeMeme\DataMapperBundle\Tests\Mapper\Adapter;
 use CodeMeme\DataMapperBundle\Mapper\Adapter\ClassAdapter;
 use CodeMeme\DataMapperBundle\Tests\Models\Post;
 use CodeMeme\DataMapperBundle\Tests\Models\Category;
+use CodeMeme\DataMapperBundle\Tests\Models\Comment;
 use CodeMeme\DataMapperBundle\Tests\Models\User;
 use CodeMeme\DataMapperBundle\Tests\Models\Address;
 
@@ -71,10 +72,9 @@ class ClassAdapterTest extends \PHPUnit_Framework_TestCase
         
         $this->assertArrayHasKey('dateModified', $converted);
         
-        $this->assertType(
-            \PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY,
-            $converted['dateModified']
-        );
+        $this->assertType(\PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY, $converted['dateModified']);
+        $this->assertType(\PHPUnit_Framework_Constraint_IsType::TYPE_ARRAY, $converted['comments']);
+        $this->assertEquals(count($converted['comments']), 2);
     }
 
     public function testConvertToUsesPublicProperties()
@@ -170,6 +170,21 @@ class ClassAdapterTest extends \PHPUnit_Framework_TestCase
         $category->setName('Code');
         
         $post->setCategory($category);
+        
+        $comment1 = new Comment;
+        $comment1->setId(1);
+        $comment1->setName('Name 1');
+        $comment1->setEmail('Email@1');
+        $comment1->setBody('Comment 1');
+        
+        $comment2 = new Comment;
+        $comment2->setId(2);
+        $comment2->setName('Name 2');
+        $comment2->setEmail('Email@2');
+        $comment2->setBody('Comment 2');
+        
+        $post->getComments()->add($comment1);
+        $post->getComments()->add($comment2);
         
         return array(
             array($post),

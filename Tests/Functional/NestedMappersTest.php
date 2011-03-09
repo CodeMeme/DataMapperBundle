@@ -21,16 +21,6 @@ class NestedMappersTest extends TestCase
         $this->assertEquals($converted, $array);
     }
 
-    /**
-     * @dataProvider postProvider
-     */
-    public function testConvertToSupportsCollections($class, $array)
-    {
-        $converted = $this->container->get('datamapper.post_mapper')->convert($array, new Post);
-        
-        $this->assertEquals($converted, $class);
-    }
-
     public function postProvider()
     {
         return array(
