@@ -40,6 +40,7 @@
                 <argument key="post_category">category</argument>
                 <argument key="last_updated">dateModified</argument>
                 <argument key="post_comments">comments</argument>
+                <argument key="comments" type="service" id="datamapper.comment_mapper" />
             </argument>
         </service>
         <service id="datamapper.author_normalizer" class="%datamapper.normalizer.class%">

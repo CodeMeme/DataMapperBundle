@@ -2,6 +2,7 @@
 
 namespace CodeMeme\DataMapperBundle\Normalizer;
 
+use CodeMeme\DataMapperBundle\Mapper\Mapper;
 use Doctrine\Common\Collections\ArrayCollection;
 
 class Normalizer implements NormalizerInterface
@@ -21,9 +22,24 @@ class Normalizer implements NormalizerInterface
         $normalized = array();
         
         foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                // Ensure we recursively denormalize the value before proceeding
+                $value = $this->normalize($value);
+            }
+            
             if ($this->getMap()->containsKey($key)) {
-                // Re-assign key to normalized key
-                $key = $this->getMap()->get($key);
+                $mapped = $this->getMap()->get($key);
+                
+                if ($mapped instanceof Mapper) {
+                    // Key isn't re-assigned, but an object that needs to be mapped on it's own
+                    $value = is_array($value)
+                           ? $mapped->normalize($value)
+                           : null;
+                } else {
+                    // Re-assign key to normalized key
+                    $key = $mapped;
+                }
+                
             } else if ($this->getMap()->contains($key)) {
                 // No need to re-assign key
             } else if ($strict) {
@@ -31,6 +47,7 @@ class Normalizer implements NormalizerInterface
                 continue;
             }
             
+            // Assign the value to the normalized key
             $normalized[$key] = $value;
         }
         

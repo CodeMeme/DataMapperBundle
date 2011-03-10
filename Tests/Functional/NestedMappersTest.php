@@ -21,6 +21,35 @@ class NestedMappersTest extends TestCase
         $this->assertEquals($converted, $array);
     }
 
+    public function testDenormalizeNestedArray()
+    {
+        $mapper = new Mapper(
+            $this->container,
+            array('CodeMeme\\DataMapperBundle\\Mapper\\Adapter\\ArrayAdapter'),
+            $this->container->get('datamapper.post_normalizer')
+        );
+        
+        $converted = $mapper->convert($this->getDenormalizedPost());
+        
+        $this->assertEquals($converted, $this->getPostArray());
+    }
+
+    public function testDenormalizedNestedToPost()
+    {
+        $mapper = new Mapper(
+            $this->container,
+            array(
+                'CodeMeme\\DataMapperBundle\\Mapper\\Adapter\\ArrayAdapter',
+                'CodeMeme\\DataMapperBundle\\Tests\\Mapper\\Adapter\\PostAdapter',
+            ),
+            $this->container->get('datamapper.post_normalizer')
+        );
+        
+        $converted = $mapper->convert($this->getDenormalizedPost(), new Post);
+        
+        $this->assertEquals($converted, $this->getPostClass());
+    }
+
     public function postProvider()
     {
         return array(
@@ -83,6 +112,34 @@ class NestedMappersTest extends TestCase
                     'name'  => 'Name 2',
                     'email' => 'Email@2',
                     'body'  => 'Comment 2',
+                ),
+            ),
+        );
+    }
+
+    protected function getDenormalizedPost()
+    {
+        return array(
+            'post_id'       => 1,
+            'post_title'    => 'My Post',
+            'post_slug'     => 'my-post',
+            'post_content'  => 'My Body',
+            'last_updated'  => null,
+            'post_category' => array(
+                'name'  => 'Category',
+            ),
+            'comments' => array(
+                0   => array(
+                    'comment_id'    => 1,
+                    'author'        => 'Name 1',
+                    'e_mail'        => 'Email@1',
+                    'text'          => 'Comment 1',
+                ),
+                1   => array(
+                    'comment_id'    => 2,
+                    'author'        => 'Name 2',
+                    'e_mail'        => 'Email@2',
+                    'text'          => 'Comment 2',
                 ),
             ),
         );
