@@ -6,7 +6,9 @@
 
     <parameters>
         <parameter key="datamapper.mapper.class">CodeMeme\DataMapperBundle\Mapper\Mapper</parameter>
-        <parameter key="datamapper.normalizer.class">CodeMeme\DataMapperBundle\Normalizer\Normalizer</parameter>
+        <parameter key="datamapper.adapter.array">CodeMeme\DataMapperBundle\Mapper\Adapter\ArrayAdapter</parameter>
+        <parameter key="datamapper.adapter.object">CodeMeme\DataMapperBundle\Mapper\Adapter\ObjectAdapter</parameter>
+        <parameter key="datamapper.adapter.class">CodeMeme\DataMapperBundle\Mapper\Adapter\ClassAdapter</parameter>
         <parameter key="datamapper.default_adapters" type="collection">
             <parameter>CodeMeme\DataMapperBundle\Mapper\Adapter\ArrayAdapter</parameter>
             <parameter>CodeMeme\DataMapperBundle\Mapper\Adapter\ObjectAdapter</parameter>
