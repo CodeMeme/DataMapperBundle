@@ -20,7 +20,7 @@ class PostMapperTest extends TestCase
         
         $mapper = $this->container->get('datamapper.post_mapper');
         
-        $converted = $mapper->convert( $mapper->convert($post, (Object) array()) );
+        $converted = $mapper->convert($mapper->convert($post, (Object) array()));
         
         $this->assertEquals(array(
             'id'            =>  1,
@@ -53,14 +53,14 @@ class PostMapperTest extends TestCase
         
         $mapper = $this->container->get('datamapper.post_mapper');
         
-        $post = $mapper->convert($d, new Post, Mapper::NORMALIZE);
+        $post = $mapper->convert($d, new Post);
         
         $this->assertEquals(1, $post->getId());
         $this->assertEquals('My Post', $post->getName());
         $this->assertEquals('my-post', $post->getSlug());
         $this->assertEquals('My Body', $post->getBody());
         
-        $denormalized = $mapper->convert($post, array(), Mapper::DENORMALIZE);
+        $denormalized = $mapper->denormalize($mapper->convert($post, array()));
         
         $this->assertEquals($denormalized, $d);
     }

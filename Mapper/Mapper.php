@@ -12,27 +12,20 @@ use CodeMeme\DataMapperBundle\Normalizer\NormalizerInterface;
 class Mapper extends ContainerAware implements AdapterInterface, NormalizerInterface
 {
 
-    CONST NORMALIZE = 1;
-
-    CONST DENORMALIZE = -1;
-
-    CONST NONE = 0;
-
     protected $adapters;
 
-    protected $normalizers;
+    protected $normalizer;
 
-    public function __construct(ContainerInterface $container = null, $adapters = array(), $normalizers = array())
+    public function __construct(ContainerInterface $container = null, $adapters = array(), $normalizer = null)
     {
         $this->adapters     = new ArrayCollection;
-        $this->normalizers  = new ArrayCollection;
         
         $this->setContainer($container);
         $this->addAdapters($adapters);
-        $this->addNormalizers($normalizers);
+        $this->setNormalizer($normalizer);
     }
 
-    public function convert($from, $to = null, $processing = self::NONE)
+    public function convert($from, $to = null)
     {
         if ($this->supports($from)) {
             $this->converted = $this->convertFrom($from);
@@ -44,17 +37,8 @@ class Mapper extends ContainerAware implements AdapterInterface, NormalizerInter
             ));
         }
         
-        switch ($processing) {
-            case self::NORMALIZE;
-                $this->converted = $this->normalize($this->converted);
-                break;
-            
-            case self::DENORMALIZE;
-                $this->converted = $this->denormalize($this->converted);
-                break;
-            
-            default:
-                break;
+        if ($this->hasNormalizer()) {
+            $this->converted = $this->normalize($this->converted);
         }
         
         if (null === $to) {
@@ -92,24 +76,6 @@ class Mapper extends ContainerAware implements AdapterInterface, NormalizerInter
                 return $adapter->convertTo($to, $normalized);
             }
         }
-    }
-
-    public function normalize(Array $data)
-    {
-        foreach ($this->getNormalizers() as $normalizer) {
-            $data = $normalizer->normalize($data);
-        }
-        
-        return $data;
-    }
-
-    public function denormalize(Array $data)
-    {
-        foreach ($this->getNormalizers() as $normalizer) {
-            $data = $normalizer->denormalize($data);
-        }
-        
-        return $data;
     }
 
     public function getContainer()
@@ -151,34 +117,31 @@ class Mapper extends ContainerAware implements AdapterInterface, NormalizerInter
         return $this;
     }
 
-    public function getNormalizers()
+    public function getNormalizer()
     {
-        return $this->normalizers;
+        return $this->normalizer;
     }
 
-    public function addNormalizer($normalizer)
+    public function setNormalizer($normalizer)
     {
-        $this->getNormalizers()->add(
-            (is_string($normalizer)) ? new $normalizer : $normalizer
-        );
+        $this->normalizer = $normalizer;
         
         return $this;
     }
 
-    public function addNormalizers($normalizers)
+    public function denormalize(Array $data)
     {
-        foreach ($normalizers as $normalizer) {
-            $this->addNormalizer($normalizer);
-        }
-        
-        return $this;
+        return $this->getNormalizer()->denormalize($data);
     }
 
-    public function setNormalizers($normalizers)
+    public function hasNormalizer()
     {
-        $this->normalizers = $normalizers;
-        
-        return $this;
+        return !!$this->getNormalizer();
+    }
+
+    public function normalize(Array $data)
+    {
+        return $this->getNormalizer()->normalize($data);
     }
 
     public function supports($object)
