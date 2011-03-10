@@ -108,7 +108,8 @@ class ClassAdapter extends Adapter
             
             // If the setter has typehint (and there are values to assign), instantiate it
             if ($value && $typehintClass = $parameter->getClass()) {
-                $value = new $typehintClass->name($value);
+                $typehint = new $typehintClass->name;
+                $value = $this->convertTo($typehint, $value);
             }
             
             // Call the setter with the new value
