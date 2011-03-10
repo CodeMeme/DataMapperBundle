@@ -5,24 +5,27 @@ namespace CodeMeme\DataMapperBundle\Mapper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Reference;
 
 use CodeMeme\DataMapperBundle\Mapper\Adapter\AdapterInterface;
-use CodeMeme\DataMapperBundle\Normalizer\NormalizerInterface;
 
-class Mapper extends ContainerAware implements AdapterInterface, NormalizerInterface
+class Mapper extends ContainerAware implements AdapterInterface
 {
 
     protected $adapters;
 
     protected $normalizer;
 
-    public function __construct(ContainerInterface $container = null, $adapters = array(), $normalizer = null)
+    protected $map;
+
+    public function __construct(ContainerInterface $container = null, $adapters = array(), $map = array())
     {
+        $this->container    = $container;
         $this->adapters     = new ArrayCollection;
+        $this->map          = new ArrayCollection;
         
-        $this->setContainer($container);
-        $this->addAdapters($adapters);
-        $this->setNormalizer($normalizer);
+        $this->setAdapters($adapters);
+        $this->setMap($map);
     }
 
     public function convert($from, $to = null)
@@ -37,9 +40,7 @@ class Mapper extends ContainerAware implements AdapterInterface, NormalizerInter
             ));
         }
         
-        if ($this->hasNormalizer()) {
-            $this->converted = $this->normalize($this->converted);
-        }
+        $this->converted = $this->normalize($this->converted);
         
         if (null === $to) {
             return $this->converted;
@@ -112,36 +113,85 @@ class Mapper extends ContainerAware implements AdapterInterface, NormalizerInter
 
     public function setAdapters($adapters)
     {
-        $this->adapters = $adapters;
+        $this->getAdapters()->clear();
+        
+        $this->addAdapters($adapters);
         
         return $this;
     }
 
-    public function getNormalizer()
+    public function getMap()
     {
-        return $this->normalizer;
+        return $this->map;
     }
 
-    public function setNormalizer($normalizer)
+    public function setMap($map)
     {
-        $this->normalizer = $normalizer;
+        $this->getMap()->clear();
+        
+        foreach ($map as $key => $value) {
+            $this->getMap()->set($key, $value);
+        }
         
         return $this;
     }
 
     public function denormalize(Array $data)
     {
-        return $this->getNormalizer()->denormalize($data);
+        $denormalized = array();
+        
+        foreach ($data as $key => $value) {
+            if ($newKey = $this->getMap()->indexOf($key)) {
+                $denormalized[$newKey] = $value;
+            } else {
+                $denormalized[$key] = $value;
+            }
+        }
+        
+        return $denormalized;
     }
 
-    public function hasNormalizer()
+    public function hasMap()
     {
-        return !!$this->getNormalizer();
+        return !$this->getMap()->isEmpty();
     }
 
     public function normalize(Array $data)
     {
-        return $this->getNormalizer()->normalize($data);
+        $normalized = array();
+        
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                // Ensure we recursively denormalize the value before proceeding
+                $value = $this->normalize($value);
+            }
+            
+            if ($this->getMap()->containsKey($key)) {
+                $mapped = $this->getMap()->get($key);
+                
+                if ($mapped instanceof Reference) {
+                    $mapped = $this->getContainer()->get($mapped);
+                }
+                
+                if ($mapped instanceof Mapper) {
+                    // Key isn't re-assigned, but an object that needs to be mapped on it's own
+                    $value = is_array($value)
+                           ? $mapped->normalize($value)
+                           : null;
+                } else {
+                    // Re-assign key to normalized key
+                    $key = $mapped;
+                }
+                
+            } else if ($this->getMap()->contains($key)) {
+                // No need to re-assign key
+            }
+            
+            // Assign the value to the normalized key
+            $normalized[$key] = $value;
+        }
+        
+        return $normalized;
     }
 
     public function supports($object)

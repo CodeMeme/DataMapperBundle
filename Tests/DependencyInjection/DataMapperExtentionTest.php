@@ -34,24 +34,14 @@ class DataMapperExtensionTest extends TestCase
         $this->assertEquals(3, $this->container->get('datamapper')->getAdapters()->count());
     }
 
-    public function testNormalizersLoaded()
+    public function testMapsLoaded()
     {
         $loader = new XmlFileLoader($this->container, __DIR__.'/../Fixtures');
         $loader->load('mappers.xml');
         
-        $this->assertTrue($this->container->has('datamapper.post_normalizer'));
-        
-        $class = $this->container->getParameter('datamapper.normalizer.class');
-        
-        $this->assertEquals($class, get_class($this->container->get('datamapper.post_normalizer')));
-        $this->assertEquals($class, get_class($this->container->get('datamapper.author_normalizer')));
-        $this->assertEquals($class, get_class($this->container->get('datamapper.comment_normalizer')));
-        
-        $class = $this->container->getParameter('datamapper.mapper.class');
-        
-        $this->assertEquals($class, get_class($this->container->get('datamapper.post_mapper')));
-        $this->assertEquals($class, get_class($this->container->get('datamapper.author_mapper')));
-        $this->assertEquals($class, get_class($this->container->get('datamapper.comment_mapper')));
+        $this->assertTrue($this->container->hasParameter('datamapper.post_map'), "Could not find datamapper.post_map");
+        $this->assertTrue($this->container->hasParameter('datamapper.author_map'), "Could not find datamapper.author_map");
+        $this->assertTrue($this->container->hasParameter('datamapper.comment_map'), "Could not find datamapper.comment_map");
     }
 
 }

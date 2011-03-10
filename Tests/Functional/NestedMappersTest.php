@@ -26,7 +26,7 @@ class NestedMappersTest extends TestCase
         $mapper = new Mapper(
             $this->container,
             array('CodeMeme\\DataMapperBundle\\Mapper\\Adapter\\ArrayAdapter'),
-            $this->container->get('datamapper.post_normalizer')
+            $this->container->getParameter('datamapper.post_map')
         );
         
         $converted = $mapper->convert($this->getDenormalizedPost());
@@ -42,7 +42,7 @@ class NestedMappersTest extends TestCase
                 'CodeMeme\\DataMapperBundle\\Mapper\\Adapter\\ArrayAdapter',
                 'CodeMeme\\DataMapperBundle\\Tests\\Mapper\\Adapter\\PostAdapter',
             ),
-            $this->container->get('datamapper.post_normalizer')
+            $this->container->getParameter('datamapper.post_map')
         );
         
         $converted = $mapper->convert($this->getDenormalizedPost(), new Post);

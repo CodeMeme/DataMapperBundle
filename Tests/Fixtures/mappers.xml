@@ -4,12 +4,36 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
 
+    <parameters>
+        <parameter key="datamapper.post_map" type="collection">
+            <parameter key="post_id">id</parameter>
+            <parameter key="post_author">author</parameter>
+            <parameter key="post_title">name</parameter>
+            <parameter key="post_slug">slug</parameter>
+            <parameter key="post_content">body</parameter>
+            <parameter key="post_category">category</parameter>
+            <parameter key="last_updated">dateModified</parameter>
+            <parameter key="post_comments">comments</parameter>
+            <parameter key="comments" type="service" id="datamapper.comment_mapper" />
+        </parameter>
+        <parameter key="datamapper.author_map" type="collection">
+            <parameter key="author_id">id</parameter>
+            <parameter key="author_name">name</parameter>
+        </parameter>
+        <parameter key="datamapper.comment_map" type="collection">
+            <parameter key="comment_id">id</parameter>
+            <parameter key="author">name</parameter>
+            <parameter key="e_mail">email</parameter>
+            <parameter key="text">body</parameter>
+        </parameter>
+    </parameters>
+
     <services>
         <!-- Mappers -->
         <service id="datamapper.post_mapper" class="%datamapper.mapper.class%">
             <argument type="service" id="service_container" />
             <argument>%datamapper.default_adapters%</argument>
-            <argument type="service" id="datamapper.post_normalizer" />
+            <argument>%datamapper.post_map%</argument>
             <call method="addAdapter">
                 <argument>CodeMeme\DataMapperBundle\Tests\Mapper\Adapter\PostAdapter</argument>
             </call>
@@ -17,7 +41,7 @@
         <service id="datamapper.author_mapper" class="%datamapper.mapper.class%">
             <argument type="service" id="service_container" />
             <argument>%datamapper.default_adapters%</argument>
-            <argument type="service" id="datamapper.author_normalizer" />
+            <argument>%datamapper.author_map%</argument>
         </service>
         <service id="datamapper.category_mapper" class="%datamapper.mapper.class%">
             <argument type="service" id="service_container" />
@@ -26,36 +50,7 @@
         <service id="datamapper.comment_mapper" class="%datamapper.mapper.class%">
             <argument type="service" id="service_container" />
             <argument>%datamapper.default_adapters%</argument>
-            <argument type="service" id="datamapper.comment_normalizer" />
-        </service>
-        
-        <!-- Normalizers -->
-        <service id="datamapper.post_normalizer" class="%datamapper.normalizer.class%">
-            <argument type="collection">
-                <argument key="post_id">id</argument>
-                <argument key="post_author">author</argument>
-                <argument key="post_title">name</argument>
-                <argument key="post_slug">slug</argument>
-                <argument key="post_content">body</argument>
-                <argument key="post_category">category</argument>
-                <argument key="last_updated">dateModified</argument>
-                <argument key="post_comments">comments</argument>
-                <argument key="comments" type="service" id="datamapper.comment_mapper" />
-            </argument>
-        </service>
-        <service id="datamapper.author_normalizer" class="%datamapper.normalizer.class%">
-            <argument type="collection">
-                <argument key="author_id">id</argument>
-                <argument key="author_name">name</argument>
-            </argument>
-        </service>
-        <service id="datamapper.comment_normalizer" class="%datamapper.normalizer.class%">
-            <argument type="collection">
-                <argument key="comment_id">id</argument>
-                <argument key="author">name</argument>
-                <argument key="e_mail">email</argument>
-                <argument key="text">body</argument>
-            </argument>
+            <argument>%datamapper.comment_map%</argument>
         </service>
     </services>
 </container>
