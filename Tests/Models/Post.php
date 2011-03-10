@@ -92,7 +92,7 @@ class Post
         return $this->comments;
     }
 
-    public function setComments($comments)
+    public function setComments(ArrayCollection $comments)
     {
         $this->comments = $comments;
         
