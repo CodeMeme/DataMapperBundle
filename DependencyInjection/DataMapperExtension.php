@@ -4,19 +4,20 @@ namespace CodeMeme\DataMapperBundle\DependencyInjection;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
-use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\Config\FileLocator;
 
 class DataMapperExtension extends Extension
 {
 
-    public function configLoad(Array $configs, ContainerBuilder $container)
+    public function load(Array $configs, ContainerBuilder $container)
     {
         if (! $container->has('datamapper')) {
-            $loader = new XmlFileLoader($container, __DIR__.'/../Resources/config');
+            $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
             $loader->load('datamapper.xml');
             
             $container->setAlias('datamapper', 'datamapper.default_mapper');
@@ -84,26 +85,9 @@ class DataMapperExtension extends Extension
         return __DIR__.'/../Resources/config/schema';
     }
 
-    /**
-     * Returns the namespace to be used for this extension (XML namespace).
-     *
-     * @return string The XML namespace
-     */
     public function getNamespace()
     {
-        return 'http://www.symfony-project.org/schema/dic/datamapper';
-    }
-
-    /**
-     * Returns the recommended alias to use in XML.
-     *
-     * This alias is also the mandatory prefix to use when using YAML.
-     *
-     * @return string The alias
-     */
-    public function getAlias()
-    {
-        return 'datamapper';
+        return 'http://www.codememe.org/schema/dic/datamapper';
     }
 
 }
